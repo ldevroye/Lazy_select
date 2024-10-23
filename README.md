@@ -29,6 +29,7 @@ This is used to compare the two algorithms on a certains *number of test* on arr
 This is used to test one algorithm on a bigger *sample* for more viable tests.
 ### base methods
 **compare(vector_size, sample_size)** : Base method called by **compare_all()** multiple times. This method write in **tests/output.txt** a json dump of the infos
+
 **test_algo(algo, vector_size, sample_size)** : base method for all the tests.
 
 There are some prints here and there that are disabled (or that you can disable) by default parameters.

@@ -28,6 +28,7 @@ class Algo(Enum):
 def get_corresponding_name(value: int) -> str:
     return [elem for elem in Algo if elem.value == value][0].name
 
+
 def time_to_decimal(input_time: float) -> float:
     return int(input_time * 1000) / 1000
 
@@ -152,7 +153,7 @@ def compare_all():
 if __name__ == '__main__':
     print(f"Starting : {current_time()}")
 
-    test(Algo.quick_select)
+    # test(Algo.quick_select)
     test(Algo.lazy_select)
 
     # compare_all()
