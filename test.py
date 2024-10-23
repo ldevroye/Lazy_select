@@ -12,6 +12,9 @@ Date : 22/10/24
 License : Free of use, "AS IS" : no warranty, credits
 """
 
+# the minimum amout of sample needed to not print every step of algorithms testing (even if print_out is True)
+MIN_SAMPLE_TO_PRINT = 10
+
 
 class Algo(Enum):
     quick_select = 1
@@ -26,7 +29,11 @@ class Algo(Enum):
 
 
 def get_corresponding_name(value: int) -> str:
-    return [elem for elem in Algo if elem.value == value][0].name
+    possible_elem = [elem for elem in Algo if elem.value == value]
+    if len(possible_elem) <= 0:
+        return str(value)
+
+    return possible_elem[0].name
 
 
 def time_to_decimal(input_time: float) -> float:
@@ -85,10 +92,11 @@ def test_algo(algo: Enum, vec_size: int, sample_size: int, print_out: bool = Tru
         # compare with naive but safe approach
         if test_assert:
             S.sort()
-            assert (result == S[k - 1])
+            to_assert = S[k-1]
+            assert (result == to_assert)
 
         end_step_time = time() - step_time
-        print_test(f"Result {i} : {result} for k:{k} in {time_to_decimal(end_step_time)}sec", print_out and sample_size < 50)
+        print_test(f"Result {i} : {result} for k:{k} in {time_to_decimal(end_step_time)}sec", print_out and sample_size < MIN_SAMPLE_TO_PRINT)
 
     end_time = time() - start_time
     print_test(f"Implementation Test passed in {time_to_decimal(end_time)} sec.\n", print_out)
@@ -115,10 +123,11 @@ def test(algo):
     test_algo(algo, Algo.hundred_k.value, 100)
     test_algo(algo, Algo.one_m.value, 30)
     test_algo(algo, Algo.ten_m.value, 10)
-    test_algo(algo, Algo.hundred_m.value, 1)
+    #test_algo(algo, Algo.hundred_m.value, 1)
 
     # one_b takes much much much (much) more time
     # test_lazy(one_b, 1)
+
 
 def compare_all():
     time_table: dict[str, tuple[float, float]] = dict[str, tuple[float, float]]()
@@ -150,12 +159,33 @@ def compare_all():
         file.write("\n\n")
 
 
-if __name__ == '__main__':
-    print(f"Starting : {current_time()}")
+def get_times(vec_sizes: List[int], sample_size: int) -> dict[int, tuple[float, float]]:
+    """
+    Get the average running time for sample_size times arrays of size vec_sizes
+    :param vec_sizes: List of sizes for arrays
+    :param sample_size: numbre of sample to do
+    :return: the dictionnary as {vec_size : (quick_avg_time, lazy_avg_time)}
+    """
+    tmp: dict[int, tuple[float, float]] = dict[int, tuple[float, float]]()
 
-    # test(Algo.quick_select)
-    test(Algo.lazy_select)
+    for vec_size in vec_sizes:
+        quick: float = test_algo(Algo.quick_select, vec_size, sample_size, False, test_assert=False)
+        print(vec_size, sample_size, quick)
+        lazy: float = test_algo(Algo.lazy_select, vec_size, sample_size, False, test_assert=False)
+        print(vec_size, sample_size, lazy)
+
+        tmp[vec_size] = (quick, lazy)
+        print("")
+
+    return tmp
+
+
+if __name__ == '__main__':
+    print(f"Starting test: {current_time()}")
+
+    test(Algo.quick_select)
+    #test(Algo.lazy_select)
 
     # compare_all()
 
-    print(f"End : {current_time()}")
+    print(f"End test: {current_time()}")

@@ -77,7 +77,7 @@ def partition(arr: List[int], left: int, right: int) -> int:
     i = left  # i = next potential sport for left partition, 1st pointer
     for j in range(left, right):  # j is the already traversed vector, 2nd pointer
         elem = arr[j]
-        if elem < pivot:
+        if elem <= pivot:
             arr[i], arr[j] = elem, arr[i]  # swap
             i += 1  # move lecture head to right
 
@@ -96,8 +96,9 @@ def quick_select_non_recursive(input_array: List[int], left: int, right: int, k:
     :param max_iteration:
     :return: the kth smallest element of input_array
     """
+
     current_iteration: int = 0
-    max_iteration = 1
+    max_iteration: int = 1
     while current_iteration < max_iteration:
         pivot = partition(input_array, left, right)
 
@@ -139,7 +140,6 @@ if __name__ == '__main__':
     n = 100
     arr = [randint(-n*10, n*10) for i in range(n)]
     k = randint(1, n)
-    #result = str(lazy_select(arr, k))
     result = str(quick_select_non_recursive(arr, 0, len(arr)-1, k))
 
     # print array
