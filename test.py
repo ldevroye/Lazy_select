@@ -17,13 +17,16 @@ class Algo(Enum):
     quick_select = 1
     lazy_select = 2
     one_b = 1_000_000_000
-    hund_m = 100_000_000
+    hundred_m = 100_000_000
     ten_m = 10_000_000
     one_m = 1_000_000
-    hund_k = 100_000
+    hundred_k = 100_000
     ten_k = 10_000
     one_k = 1_000
 
+
+def get_corresponding_name(value: int) -> str:
+    return [elem for elem in Algo if elem.value == value][0].name
 
 def time_to_decimal(input_time: float) -> float:
     return int(input_time * 1000) / 1000
@@ -31,32 +34,6 @@ def time_to_decimal(input_time: float) -> float:
 
 def current_time() -> str:
     return datetime.now().strftime("%Hh%M")
-
-
-def compare(vec_size: int, sample_size: int) -> tuple[float, float]:
-    """
-    Compare lazy and quick algorithms
-    :return: None
-    """
-
-    time_quick: float = time_to_decimal(test_algo(Algo.quick_select, vec_size, sample_size, False, test_assert=False))
-    time_lazy: float = time_to_decimal(test_algo(Algo.lazy_select, vec_size, sample_size,  False, test_assert=False))
-
-    time_test: (float, float) = (time_quick, time_lazy)
-
-    print(f"Comparison finished (vec {vec_size}, sample {sample_size}) {current_time()}")
-
-    return time_test
-
-
-def test(algo):
-    test_algo(algo, Algo.hund_k.value, 100)
-    test_algo(algo, Algo.one_m.value, 30)
-    test_algo(algo, Algo.ten_m.value, 10)
-    test_algo(algo, Algo.hund_m.value, 5)
-
-    # one_b takes much much much (much) more time
-    # test_lazy(one_b, 1)
 
 
 def print_test(test: str, print_bool: bool = True) -> None:
@@ -84,8 +61,8 @@ def test_algo(algo: Enum, vec_size: int, sample_size: int, print_out: bool = Tru
     n = vec_size
     ten_n = 10 * n
     start_time = time()
-
-    print_test(f"\nStart testing {sample_size} samples with '{algo.name}' algorithm, vec size:{n}", print_out)
+    print_test(f"Start testing {sample_size} samples with algorithm:'{algo.name}', "
+               f"vector size:'{get_corresponding_name(vec_size)}'", print_out)
 
     for i in range(sample_size):
         step_time = time()
@@ -117,6 +94,31 @@ def test_algo(algo: Enum, vec_size: int, sample_size: int, print_out: bool = Tru
     return end_time/sample_size
 
 
+def compare(vec_size: int, sample_size: int) -> tuple[float, float]:
+    """
+    Compare lazy and quick algorithms
+    :return: None
+    """
+
+    time_quick: float = time_to_decimal(test_algo(Algo.quick_select, vec_size, sample_size, False, test_assert=False))
+    time_lazy: float = time_to_decimal(test_algo(Algo.lazy_select, vec_size, sample_size,  False, test_assert=False))
+
+    time_test: (float, float) = (time_quick, time_lazy)
+
+    print(f"Comparison finished (vec {get_corresponding_name(vec_size)}, sample {sample_size}) {current_time()}")
+
+    return time_test
+
+
+def test(algo):
+    test_algo(algo, Algo.hundred_k.value, 100)
+    test_algo(algo, Algo.one_m.value, 30)
+    test_algo(algo, Algo.ten_m.value, 10)
+    test_algo(algo, Algo.hundred_m.value, 1)
+
+    # one_b takes much much much (much) more time
+    # test_lazy(one_b, 1)
+
 def compare_all():
     time_table: dict[str, tuple[float, float]] = dict[str, tuple[float, float]]()
 
@@ -124,15 +126,15 @@ def compare_all():
     sample_size: int = 2000
     time_table[str((vec_size, sample_size))] = compare(vec_size, sample_size)
 
-    vec_size: int = Algo.hund_k.value
+    vec_size: int = Algo.hundred_k.value
     sample_size: int = 200
     time_table[str((vec_size, sample_size))] = compare(vec_size, sample_size)
 
-    """
     vec_size = Algo.one_m.value
-    sample_size = 30
+    sample_size = 10
     time_table[str((vec_size, sample_size))] = compare(vec_size, sample_size)
 
+    """
     vec_size = Algo.ten_m.value
     sample_size = 5
     time_table[str((vec_size, sample_size))] = compare(vec_size, sample_size)
@@ -150,9 +152,9 @@ def compare_all():
 if __name__ == '__main__':
     print(f"Starting : {current_time()}")
 
-    #test(Algo.lazy_select)
-    #test(Algo.quick_select)
+    test(Algo.quick_select)
+    test(Algo.lazy_select)
 
-    compare_all()
+    # compare_all()
 
     print(f"End : {current_time()}")
