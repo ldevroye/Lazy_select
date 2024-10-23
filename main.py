@@ -42,8 +42,7 @@ def lazy_select(arr: List[int], k: int, max_iteration: int = 2000) -> int:
         rank_b: int = 0
         P: List[int] = []
 
-        for i in range(n):
-            elem = arr[i]
+        for elem in arr:
             if elem < a:
                 rank_a += 1
             if elem <= b:
@@ -56,7 +55,7 @@ def lazy_select(arr: List[int], k: int, max_iteration: int = 2000) -> int:
 
             range_elem: int = k - rank_a - 1
             if rank_a <= k <= rank_b and range_elem < len(P):  # S-k in P
-                P.sort()
+                P.sort()  # 5. Sort and return
                 return P[range_elem]
 
         current_iteration += 1
