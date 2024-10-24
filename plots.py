@@ -70,7 +70,7 @@ if __name__ == '__main__':
                             [Algo.one_m.value*(i+1) for i in range(1, 10, 2)] +
                             [Algo.ten_m.value*(i+1) for i in range(1, 9, 3)])
 
-    to_compare = big_sizes
+    to_compare = small_sizes
 
     print_array(to_compare)
     dict_info: dict[int, tuple[tuple[float, float], tuple[float, float]]] = get_infos(to_compare, sample_size)

@@ -61,16 +61,24 @@ def add_underscore(value: int) -> str:
     :return: the formated string of the value
     """
     num_str: str = str(value)
-    ret: List[str] = []
+    ret: str = ''
 
     three_consecutives: int = 0
-    for index, elem in enumerate(reversed(num_str)):
-        ret = [elem] + ret[0:]
-        three_consecutives += 1
+    rev_num: str = num_str[::-1]
+    for index in range(len(rev_num)):
+        elem = rev_num[index]
 
-        if three_consecutives == 3 and index < len(num_str)-2:
-            ret = ['_'] + ret[0:]
-            three_consecutives = 0
+        ret: str = elem + ret[0:]
+        three_consecutives += 1
+        if index != len(num_str)-2 and index < len(num_str)-1:
+            if three_consecutives == 3:
+                ret = '_' + ret[0:]
+                three_consecutives = 0
+
+        elif index == len(num_str)-2:  # the 2nd last one checks if the last char is a digit (or a '-' by definition)
+            if rev_num[len(rev_num)-1].isdigit() is True and three_consecutives == 3:
+                ret = '_' + ret[0:]
+
 
     return ''.join(ret)
 
@@ -234,7 +242,7 @@ if __name__ == '__main__':
     print(f"Starting test: {current_time()}")
     #test(Algo.lazy_select)
 
-    test_algo(Algo.lazy_select, Algo.hundred_k.value, 100)
+    test_algo(Algo.quick_select, Algo.one_m.value, 50)
     # compare_all()
 
     print(f"End test: {current_time()}")
