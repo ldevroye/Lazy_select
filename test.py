@@ -133,7 +133,7 @@ def test_algo(algorithm_class: Select, vec_size: int, sample_size: int, print_ou
         # Define random rank to return
         k = randint(1, n)
 
-        last_comparaisons = algorithm_class.comparisons
+        last_comparisons = algorithm_class.comparisons
         # Find the kth smallest element in S
         result_iter: int = algorithm_class.run(S, k)
 
@@ -146,7 +146,7 @@ def test_algo(algorithm_class: Select, vec_size: int, sample_size: int, print_ou
         end_step_time = time() - step_time
         print_test(f"Result {add_underscore(i)} : {add_underscore(result_iter)} "
                    f"for k:{add_underscore(k)} in {int_to_decimal(end_step_time)}sec doing "
-                   f"{add_underscore(algorithm_class.comparisons-last_comparaisons)} comparisons ",
+                   f"{add_underscore(algorithm_class.comparisons-last_comparisons)} comparisons ",
                    print_out and sample_size < MIN_SAMPLE_TO_PRINT)
 
     end_time = time() - start_time
@@ -232,7 +232,7 @@ def get_infos(vec_sizes: List[int], sample_size: int) -> dict[int, tuple[tuple[f
 if __name__ == '__main__':
     print(f"Starting test: {current_time()}")
 
-    test(QuickSelect())
+    test(LazySelect())
 
     #test_algo(Algo.quick_select, Algo.one_m.value, 50)
     # compare_all()

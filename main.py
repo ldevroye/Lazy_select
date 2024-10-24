@@ -41,10 +41,11 @@ class Select:
         i = left  # i = next potential sport for left partition, 1st pointer
         for j in range(left, right):  # j is the already traversed vector, 2nd pointer
             elem = input_array[j]
+            self.comparisons += 1
+
             if elem <= pivot:
                 input_array[i], input_array[j] = elem, input_array[i]  # swap
                 i += 1  # move lecture head to right
-                self.comparisons += 1
 
         input_array[i], input_array[right] = input_array[right], input_array[i]
         return i
@@ -61,6 +62,7 @@ class Select:
         stack = [(0, len(arr_to_sort) - 1)]
 
         while stack:  # basic working of a stack
+            self.comparisons += 2
             start, end = stack.pop()
 
             # Partition the array and get the pivot index
@@ -111,7 +113,7 @@ class LazySelect(Select):
             P: List[int] = []
 
             for elem in input_array:
-                self.comparisons += 1
+                self.comparisons += 3
                 if elem < a:
                     rank_a += 1
                 if elem <= b:
@@ -152,7 +154,8 @@ class QuickSelect(Select):
         current_iteration: int = 0
         max_iteration: int = 1
         while current_iteration < max_iteration:
-            pivot = QuickSelect.partition(self, input_array, left, right)
+            self.comparisons += 2
+            pivot = self.partition(input_array, left, right)
 
             if pivot == k - 1:
                 return input_array[k - 1]
@@ -184,7 +187,7 @@ if __name__ == '__main__':
     print(arr == test, len(arr), test_Select.comparisons)
 
     algo = QuickSelect()
-    result = str(algo.run(arr, 0, len(arr) - 1, kth))
+    result = str(algo.run(arr, kth))
 
     # print array
     arr.sort()

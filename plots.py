@@ -27,16 +27,9 @@ def plot(dict_input: dict[int, tuple[float, float]], avg_time: bool = True):
         quick_times.append(elem[0])
         lazy_times.append(elem[1])
 
+    expected_times_quick: List[float] = [3.386 * x for x in sizes]  # bound for comparisons of QuickSelect
+    expected_times_lazy: List[float] = [4 * x for x in sizes]  # not sure about this one (bound for LazySelect)
     plt.figure(figsize=(10, 6))
-
-    # Plot QuickSelect times
-    plt.plot(sizes, quick_times, marker='o', label='QuickSelect', color='b')
-
-    # Plot LazySelect times
-    plt.plot(sizes, lazy_times, marker='o', label='LazySelect', color='g')
-
-    plt.xscale('log')
-    plt.yscale('log')
 
     # Adding labels and title
     plt.xlabel('Array Size (n)')
@@ -45,22 +38,29 @@ def plot(dict_input: dict[int, tuple[float, float]], avg_time: bool = True):
         plt.ylabel('Average Running Time')
         plt.title('QuickSelect vs LazySelect: Average Running Time by Size')
 
-    else:
+
+    else:  # comparisons
         plt.ylabel('Number of Comparisons')
         plt.title('QuickSelect vs LazySelect: Number of Comparisons by Size')
+        plt.plot(sizes, expected_times_quick, marker='x', label='Expected Quick', color='orange')
+        plt.plot(sizes, expected_times_lazy, marker='x', label='Expected Lazy', color='r')
 
-    # Add a legend
+    plt.plot(sizes, quick_times, marker='o', label='QuickSelect', color='b')
+    plt.plot(sizes, lazy_times, marker='o', label='LazySelect', color='g')
+
+    plt.xscale('log')
+    plt.yscale('log')
+
     plt.legend()
-
-
-    # Display the plot
+    # Display
     plt.grid(True)
     plt.show()
 
 
 if __name__ == '__main__':
-    print(f"Starting plots : {current_time()}")
     sample_size = 10
+
+    print(f"Starting plots for {sample_size} samplpes : {current_time()}")
 
     small_sizes: List[int] = ([Algo.ten_k.value, Algo.ten_k.value*5] +
                               [Algo.hundred_k.value*(i+1) for i in range(0, 10, 2)] +
