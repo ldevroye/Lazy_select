@@ -12,6 +12,7 @@ License : Free of use, "AS IS" : no warranty, credits
 
 class Select:
     comparisons: int = 0
+    name: str = 'Select'
 
     def run(self, input_array: List[int], k: int) -> int:
         """
@@ -75,6 +76,7 @@ class Select:
 
 
 class LazySelect(Select):
+    name = 'LazySelect'
 
     def run(self, input_array: List[int], k: int, max_iteration: int = 2000) -> int:
         """
@@ -134,6 +136,7 @@ class LazySelect(Select):
 
 
 class QuickSelect(Select):
+    name = 'QuickSelect'
 
     def run(self, input_array: List[int], k: int) -> int:
         """

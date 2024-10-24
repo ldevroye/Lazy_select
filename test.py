@@ -17,12 +17,10 @@ License : Free of use, "AS IS" : no warranty, credits
 """
 
 # the minimum amout of sample needed to not print every step of algorithms testing (even if print_out is True)
-MIN_SAMPLE_TO_PRINT = 120
+MIN_SAMPLE_TO_PRINT = 100
 
 
 class Algo(Enum):
-    quick_select = 1
-    lazy_select = 2
     one_b = 1_000_000_000
     hundred_m = 100_000_000
     ten_m = 10_000_000
@@ -110,11 +108,11 @@ def print_test(test: str, print_bool: bool = True) -> None:
         print(test)
 
 
-def test_algo(algo: Enum, vec_size: int, sample_size: int, print_out: bool = True, test_assert: bool = True) -> (float, int):
+def test_algo(algorithm_class: Select, vec_size: int, sample_size: int, print_out: bool = True, test_assert: bool = True) -> (float, int):
     """
     Test the given algorithm 'algo' on an array of size 'vec_size' for 'sample_size' time.
     return the average time to resolve the arrays for the given size
-    :param algo:
+    :param algorithm_class:
     :param vec_size:
     :param sample_size:
     :param print_out:
@@ -124,15 +122,8 @@ def test_algo(algo: Enum, vec_size: int, sample_size: int, print_out: bool = Tru
     n = vec_size
     ten_n = 10 * n
     start_time = time()
-    print_test(f"Start testing {sample_size} samples with algorithm:'{algo.name}', "
+    print_test(f"Start testing {sample_size} samples with algorithm:'{algorithm_class.name}', "
                f"vector size:'{get_corresponding_name(vec_size)}'", print_out)
-
-    if algo == Algo.lazy_select:
-        algorithm = LazySelect()
-    elif algo == Algo.quick_select:
-        algorithm = QuickSelect()
-    else:
-        raise Exception("unknown algorithm requested")
 
     for i in range(sample_size):
         step_time = time()
@@ -142,9 +133,9 @@ def test_algo(algo: Enum, vec_size: int, sample_size: int, print_out: bool = Tru
         # Define random rank to return
         k = randint(1, n)
 
-        last_comparaisons = algorithm.comparisons
+        last_comparaisons = algorithm_class.comparisons
         # Find the kth smallest element in S
-        result_iter: int = algorithm.run(S, k)
+        result_iter: int = algorithm_class.run(S, k)
 
         # compare with naive but safe approach
         if test_assert:
@@ -155,12 +146,12 @@ def test_algo(algo: Enum, vec_size: int, sample_size: int, print_out: bool = Tru
         end_step_time = time() - step_time
         print_test(f"Result {add_underscore(i)} : {add_underscore(result_iter)} "
                    f"for k:{add_underscore(k)} in {int_to_decimal(end_step_time)}sec doing "
-                   f"{add_underscore(algorithm.comparisons-last_comparaisons)} comparisons ",
+                   f"{add_underscore(algorithm_class.comparisons-last_comparaisons)} comparisons ",
                    print_out and sample_size < MIN_SAMPLE_TO_PRINT)
 
     end_time = time() - start_time
     print_test(f"Implementation Test passed in {int_to_decimal(end_time)} sec.\n", print_out)
-    return int_to_decimal(end_time / sample_size), int(algorithm.comparisons / sample_size)
+    return int_to_decimal(end_time / sample_size), int(algorithm_class.comparisons / sample_size)
 
 
 def compare(vec_size: int, sample_size: int) -> tuple[float, float]:
@@ -169,8 +160,8 @@ def compare(vec_size: int, sample_size: int) -> tuple[float, float]:
     :return: None
     """
 
-    time_quick: float = int_to_decimal(test_algo(Algo.quick_select, vec_size, sample_size, False, test_assert=False))
-    time_lazy: float = int_to_decimal(test_algo(Algo.lazy_select, vec_size, sample_size, False, test_assert=False))
+    time_quick: float = int_to_decimal(test_algo(QuickSelect(), vec_size, sample_size, False, test_assert=False))
+    time_lazy: float = int_to_decimal(test_algo(LazySelect(), vec_size, sample_size, False, test_assert=False))
 
     time_test: (float, float) = (time_quick, time_lazy)
 
@@ -179,10 +170,10 @@ def compare(vec_size: int, sample_size: int) -> tuple[float, float]:
     return time_test
 
 
-def test(algo):
-    test_algo(algo, Algo.hundred_k.value, 100)
-    test_algo(algo, Algo.one_m.value, 30)
-    test_algo(algo, Algo.ten_m.value, 10)
+def test(algo_to_test: Select):
+    test_algo(algo_to_test, Algo.hundred_k.value, 100)
+    test_algo(algo_to_test, Algo.one_m.value, 30)
+    test_algo(algo_to_test, Algo.ten_m.value, 10)
     #test_algo(algo, Algo.hundred_m.value, 1)
 
     # one_b takes much much much (much) more time
@@ -229,9 +220,9 @@ def get_infos(vec_sizes: List[int], sample_size: int) -> dict[int, tuple[tuple[f
     tmp: dict[int, tuple[tuple[float, float], tuple[float, float]]] = dict[int, tuple[tuple[float, float], tuple[float, float]]]()
 
     for vec_size in vec_sizes:
-        quick: tuple[float, float] = test_algo(Algo.quick_select, vec_size, sample_size, False, test_assert=False)
+        quick: tuple[float, float] = test_algo(QuickSelect(), vec_size, sample_size, False, test_assert=False)
         print("quick :", get_corresponding_name(vec_size), sample_size, quick[0], add_underscore(int(quick[1])))
-        lazy: tuple[float, float] = test_algo(Algo.lazy_select, vec_size, sample_size, False, test_assert=False)
+        lazy: tuple[float, float] = test_algo(LazySelect(), vec_size, sample_size, False, test_assert=False)
         print("lazy :", get_corresponding_name(vec_size), sample_size, lazy[0], add_underscore(int(lazy[1])), "\n")
 
         tmp[vec_size] = (quick, lazy)
@@ -240,9 +231,10 @@ def get_infos(vec_sizes: List[int], sample_size: int) -> dict[int, tuple[tuple[f
 
 if __name__ == '__main__':
     print(f"Starting test: {current_time()}")
-    #test(Algo.lazy_select)
 
-    test_algo(Algo.quick_select, Algo.one_m.value, 50)
+    test(QuickSelect())
+
+    #test_algo(Algo.quick_select, Algo.one_m.value, 50)
     # compare_all()
 
     print(f"End test: {current_time()}")
