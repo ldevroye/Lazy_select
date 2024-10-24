@@ -10,18 +10,20 @@ License : Free of use, "AS IS" : no warranty, credits
 """
 
 
-def plot_running_time(sizes: List[int], dict_input: dict[int, tuple[float, float]]):
+def plot(dict_input: dict[int, tuple[float, float]], avg_time: bool = True):
     """
-    Plots the average running time of QuickSelect vs LazySelect as a function of input size.
-    :param sizes: sizes for the x axis
+    Plots the average running time or number of comparis ons of QuickSelect vs LazySelect as a function of input size.
+    :param avg_time: if Turned to True, the Plot is for average time, otherswise for number of comparisons
     :param dict_input: dictionnary of {vector size: (quick_time, lazy_time)}
 
     ! len(DICT) = len(sizes) ! otherwise will crash
     """
+    sizes: List[int] = []
     quick_times: List[float] = []
     lazy_times: List[float] = []
     for key in dict_input.keys():
         elem = dict_input[key]
+        sizes.append(key)
         quick_times.append(elem[0])
         lazy_times.append(elem[1])
 
@@ -35,58 +37,21 @@ def plot_running_time(sizes: List[int], dict_input: dict[int, tuple[float, float
 
     plt.xscale('log')
     plt.yscale('log')
-
-    # Adding labels and title
-    plt.xlabel('Input Size (n)')
-    plt.ylabel('Average Running Time (seconds)')
-    plt.title('QuickSelect vs LazySelect: Running Time Comparison')
-
-    # Add a legend
-    plt.legend()
-
-    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
-
-    # Display the plot
-    plt.grid(True)
-    plt.show()
-
-
-def plot_comparison_number(sizes: List[int], dict_input: dict[int, tuple[float, float]]):
-    """
-    Plots the average running time of QuickSelect vs LazySelect as a function of input size.
-    :param sizes: sizes for the x axis
-    :param dict_input: dictionnary of {vector size: (quick_time, lazy_time)}
-
-    ! len(DICT) = len(sizes) ! otherwise will crash
-    """
-    quick_times: List[float] = []
-    lazy_times: List[float] = []
-    for key in dict_input.keys():
-        elem = dict_input[key]
-        quick_times.append(elem[0])
-        lazy_times.append(elem[1])
-
-    plt.figure(figsize=(10, 6))
-
-    # Plot QuickSelect times
-    plt.plot(sizes, quick_times, marker='o', label='QuickSelect', color='b')
-
-    # Plot LazySelect times
-    plt.plot(sizes, lazy_times, marker='o', label='LazySelect', color='g')
-
-    plt.xscale('log')
-    plt.yscale('log')
-
 
     # Adding labels and title
     plt.xlabel('Array Size (n)')
-    plt.ylabel('Number of Comparisons')
-    plt.title('QuickSelect vs LazySelect: Number of Comparisons by Size')
+
+    if avg_time:
+        plt.ylabel('Average Running Time')
+        plt.title('QuickSelect vs LazySelect: Average Running Time by Size')
+
+    else:
+        plt.ylabel('Number of Comparisons')
+        plt.title('QuickSelect vs LazySelect: Number of Comparisons by Size')
 
     # Add a legend
     plt.legend()
 
-    plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
 
     # Display the plot
     plt.grid(True)
@@ -95,6 +60,7 @@ def plot_comparison_number(sizes: List[int], dict_input: dict[int, tuple[float, 
 
 if __name__ == '__main__':
     print(f"Starting plots : {current_time()}")
+    sample_size = 10
 
     small_sizes: List[int] = ([Algo.ten_k.value, Algo.ten_k.value*5] +
                               [Algo.hundred_k.value*(i+1) for i in range(0, 10, 2)] +
@@ -107,11 +73,11 @@ if __name__ == '__main__':
     to_compare = big_sizes
 
     print_array(to_compare)
-    dict_info: dict[int, tuple[tuple[float, float], tuple[float, float]]] = get_infos(to_compare, 1)
+    dict_info: dict[int, tuple[tuple[float, float], tuple[float, float]]] = get_infos(to_compare, sample_size)
 
-    print(f"Ending plots : {current_time()}")
+    print(f"Ending plots for {sample_size} samples : {current_time()}")
     dict_time = {key: (dict_info[key][0][0], dict_info[key][1][0]) for key in dict_info.keys()}
     dict_nbr_comparisons = {key: (dict_info[key][0][1], dict_info[key][1][1]) for key in dict_info.keys()}
 
-    plot_running_time(to_compare, dict_time)
-    plot_comparison_number(to_compare, dict_nbr_comparisons)
+    plot(dict_time)
+    plot(dict_nbr_comparisons, False)

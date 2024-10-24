@@ -1,8 +1,6 @@
-from random import sample, randint
+from random import sample, randint, randrange
 from math import floor, ceil, sqrt
 from typing import List
-
-from test import *
 
 """
 Desc : Implementation part of : Implementation and testing of 2 random bases algorithms : lazy select and quick select
@@ -15,20 +13,77 @@ License : Free of use, "AS IS" : no warranty, credits
 class Select:
     comparisons: int = 0
 
-    def run(self, **kwargs) -> int:
+    def run(self, input_array: List[int], k: int) -> int:
+        """
+        Holder to be overridden
+        :param k: kth smallest element to find
+        :param input_array: array to search (not need to be sorted)
+        """
         pass
+
+    def partition(self, input_array: List[int], left: int, right: int, random: bool = True) -> int:
+        """
+        Subalgorithm for quickselect, 2 pointer algorithm
+        :return: the pivot
+        """
+        # pivot is either randorm or arr[right] or some heuristic (like median)
+        # takes the worst case (if array is sorted) out of the equation
+        # comment this if you cant to take last element (and not random)
+        if random:
+            index_pivot = randint(left, right)
+            input_array[right], input_array[index_pivot] = input_array[index_pivot], input_array[right]
+
+        # we take the right element since we swap it for the random
+        pivot = input_array[right]
+
+        # start the lookup at the left of the vector
+        i = left  # i = next potential sport for left partition, 1st pointer
+        for j in range(left, right):  # j is the already traversed vector, 2nd pointer
+            elem = input_array[j]
+            if elem <= pivot:
+                input_array[i], input_array[j] = elem, input_array[i]  # swap
+                i += 1  # move lecture head to right
+                self.comparisons += 1
+
+        input_array[i], input_array[right] = input_array[right], input_array[i]
+        return i
+
+    def QuickSort(self, arr_to_sort: List[int]) -> None:
+        """
+        Quick implementation of an iterative QuickSort
+
+        it is done to have the good number of comparisons for the QuickSelect and LazySelect
+        :param arr_to_sort: array to sort
+        :return: None
+        """
+        # Create an auxiliary stack to avoid recursion
+        stack = [(0, len(arr_to_sort) - 1)]
+
+        while stack:  # basic working of a stack
+            start, end = stack.pop()
+
+            # Partition the array and get the pivot index
+            pivot_index = self.partition(arr_to_sort, start, end, False)
+
+            # Very similar to quick select, compare the pivot
+            if pivot_index - 1 > start:
+                stack.append((start, pivot_index - 1))
+
+            # no elif because it can (and will in a lot of times) be both
+            if pivot_index + 1 < end:
+                stack.append((pivot_index + 1, end))
 
 
 class LazySelect(Select):
 
-    def run(self, arr: List[int], k: int, max_iteration: int = 2000) -> int:
+    def run(self, input_array: List[int], k: int, max_iteration: int = 2000) -> int:
         """
-            Returns the kth smallest element of the arr
-            :param arr the array of size len_arr to search
-            :param k the index [1,len_arr]
-            :param max_iteration nbr of iteration before stopping the algorithm if no solution found
-            """
-        n: int = len(arr)
+        Returns the kth smallest element of the array 'arr'
+        :param input_array the array of size len_arr to search
+        :param k the index [1,len_arr]
+        :param max_iteration nbr of iteration before stopping the algorithm if no solution found
+        """
+        n: int = len(input_array)
         n_34 = n ** (3 / 4)
         n_14 = n ** (1 / 4)
         x: int = int(k / n_14)  # k / len_arr**1/4 == k * len_arr**-1/4
@@ -38,9 +93,9 @@ class LazySelect(Select):
         while current_iteration < max_iteration:
             # 1. pick n^3/4 elements from S independently and uniformly at random with replacement
             # call this multiset R
-            R: List[int] = sample(arr, ceil(n_34))  # choice is with replacement
+            R: List[int] = sample(input_array, ceil(n_34))  # choice is with replacement
             # 2. sort R in O(len_arr**3/4) using an optimal sorting algo
-            R.sort()
+            self.QuickSort(R)
 
             # 3.
             l: int = max(floor(x - sqrt(n)), 1)
@@ -53,7 +108,7 @@ class LazySelect(Select):
             rank_b: int = 0
             P: List[int] = []
 
-            for elem in arr:
+            for elem in input_array:
                 self.comparisons += 1
                 if elem < a:
                     rank_a += 1
@@ -67,7 +122,7 @@ class LazySelect(Select):
 
                 range_elem: int = k - rank_a - 1
                 if rank_a <= k <= rank_b and range_elem < len(P):  # S-k in P
-                    P.sort()  # 5. Sort and return
+                    self.QuickSort(P)  # 5. Sort and return
                     return P[range_elem]
 
             current_iteration += 1
@@ -80,37 +135,16 @@ class LazySelect(Select):
 
 class QuickSelect(Select):
 
-    def partition(self, arr: List[int], left: int, right: int) -> int:
-        """
-        Subalgorithm for quickselect, 2 pointer algorithm
-        :return: the pivot
-        """
-        pivot = arr[right]
-
-        # start the lookup at the left of the vector
-        i = left  # i = next potential sport for left partition, 1st pointer
-        for j in range(left, right):  # j is the already traversed vector, 2nd pointer
-            elem = arr[j]
-            if elem <= pivot:
-                arr[i], arr[j] = elem, arr[i]  # swap
-                i += 1  # move lecture head to right
-
-                self.comparisons += 1
-
-        arr[i], arr[right] = arr[right], arr[i]
-        return i
-
-    def run(self, input_array: List[int], left: int, right: int, k: int) -> int:
+    def run(self, input_array: List[int], k: int) -> int:
         """
         Quick select algorithm (find the kth smallest element of an array) without recursion to save a bit of performance,
         using partition()
         :param input_array:
-        :param left:
-        :param right:
         :param k: the index to find
-        :param max_iteration:
         :return: the kth smallest element of input_array
         """
+        left: int = 0
+        right: int = len(input_array)-1
 
         current_iteration: int = 0
         max_iteration: int = 1
@@ -134,16 +168,24 @@ class QuickSelect(Select):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    from test import print_array
+
     n = 100
     arr = [randint(-n * 10, n * 10) for i in range(n)]
-    k = randint(1, n)
+    kth = randint(1, n)
+    test = sorted(arr)
+    test_Select = Select()
+
+    test_Select.QuickSort(arr)
+    print_array(arr)
+    print(arr == test, len(arr), test_Select.comparisons)
 
     algo = QuickSelect()
-    result = str(algo.run(arr, 0, len(arr) - 1, k))
+    result = str(algo.run(arr, 0, len(arr) - 1, kth))
 
     # print array
     arr.sort()
     print_array(arr)
 
     # print results
-    print(f"result:{result}, k:{k}, arr[{k}]:{arr[k - 1]}")
+    print(f"result:{result}, k:{kth}, arr[{kth}]:{arr[kth - 1]}")

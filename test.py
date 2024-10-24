@@ -5,8 +5,8 @@ from enum import Enum
 from time import time
 from datetime import datetime
 
-from main import *
 
+from main import *
 
 
 """
@@ -17,7 +17,7 @@ License : Free of use, "AS IS" : no warranty, credits
 """
 
 # the minimum amout of sample needed to not print every step of algorithms testing (even if print_out is True)
-MIN_SAMPLE_TO_PRINT = 10
+MIN_SAMPLE_TO_PRINT = 120
 
 
 class Algo(Enum):
@@ -39,7 +39,7 @@ def print_array(input_array: List):
     :return: None
     """
 
-    if len(input_array) == 0:
+    if len(input_array) < 1:
         print("[]")
         return
 
@@ -47,7 +47,7 @@ def print_array(input_array: List):
     for i in range(len(input_array)):
         str_arr += f"{i}:{input_array[i]}, "
     str_arr = str_arr[:-2] + "]"
-    print(f"str_arr:\n{str_arr}")
+    print(f"\n{str_arr}")
 
 
 def add_underscore(value: int) -> str:
@@ -64,11 +64,11 @@ def add_underscore(value: int) -> str:
     ret: List[str] = []
 
     three_consecutives: int = 0
-    for index, elem  in enumerate(reversed(num_str)):
+    for index, elem in enumerate(reversed(num_str)):
         ret = [elem] + ret[0:]
         three_consecutives += 1
 
-        if three_consecutives == 3 and index < len(num_str)-1:
+        if three_consecutives == 3 and index < len(num_str)-2:
             ret = ['_'] + ret[0:]
             three_consecutives = 0
 
@@ -119,7 +119,12 @@ def test_algo(algo: Enum, vec_size: int, sample_size: int, print_out: bool = Tru
     print_test(f"Start testing {sample_size} samples with algorithm:'{algo.name}', "
                f"vector size:'{get_corresponding_name(vec_size)}'", print_out)
 
-    algorithm = None
+    if algo == Algo.lazy_select:
+        algorithm = LazySelect()
+    elif algo == Algo.quick_select:
+        algorithm = QuickSelect()
+    else:
+        raise Exception("unknown algorithm requested")
 
     for i in range(sample_size):
         step_time = time()
@@ -129,30 +134,25 @@ def test_algo(algo: Enum, vec_size: int, sample_size: int, print_out: bool = Tru
         # Define random rank to return
         k = randint(1, n)
 
+        last_comparaisons = algorithm.comparisons
         # Find the kth smallest element in S
-        result: int
-
-        if algo == Algo.lazy_select:
-            algorithm = LazySelect()
-            result = algorithm.run(S, k)
-        elif algo == Algo.quick_select:
-            algorithm = QuickSelect()
-            result = algorithm.run(S, 0, len(S) - 1, k)
-        else:
-            raise Exception("unknown algorithm requested")
+        result_iter: int = algorithm.run(S, k)
 
         # compare with naive but safe approach
         if test_assert:
             S.sort()
             to_assert = S[k-1]
-            assert (result == to_assert)
+            assert (result_iter == to_assert)
 
         end_step_time = time() - step_time
-        print_test(f"Result {i} : {result} for k:{k} in {int_to_decimal(end_step_time)}sec", print_out and sample_size < MIN_SAMPLE_TO_PRINT)
+        print_test(f"Result {add_underscore(i)} : {add_underscore(result_iter)} "
+                   f"for k:{add_underscore(k)} in {int_to_decimal(end_step_time)}sec doing "
+                   f"{add_underscore(algorithm.comparisons-last_comparaisons)} comparisons ",
+                   print_out and sample_size < MIN_SAMPLE_TO_PRINT)
 
     end_time = time() - start_time
     print_test(f"Implementation Test passed in {int_to_decimal(end_time)} sec.\n", print_out)
-    return int_to_decimal(end_time / sample_size), ceil(algorithm.comparisons / sample_size)
+    return int_to_decimal(end_time / sample_size), int(algorithm.comparisons / sample_size)
 
 
 def compare(vec_size: int, sample_size: int) -> tuple[float, float]:
@@ -222,9 +222,9 @@ def get_infos(vec_sizes: List[int], sample_size: int) -> dict[int, tuple[tuple[f
 
     for vec_size in vec_sizes:
         quick: tuple[float, float] = test_algo(Algo.quick_select, vec_size, sample_size, False, test_assert=False)
-        print("quick :", get_corresponding_name(vec_size), sample_size, quick[0], quick[1])
+        print("quick :", get_corresponding_name(vec_size), sample_size, quick[0], add_underscore(int(quick[1])))
         lazy: tuple[float, float] = test_algo(Algo.lazy_select, vec_size, sample_size, False, test_assert=False)
-        print("lazy :", get_corresponding_name(vec_size), sample_size, lazy[0], lazy[1], "\n")
+        print("lazy :", get_corresponding_name(vec_size), sample_size, lazy[0], add_underscore(int(lazy[1])), "\n")
 
         tmp[vec_size] = (quick, lazy)
     return tmp
@@ -232,9 +232,9 @@ def get_infos(vec_sizes: List[int], sample_size: int) -> dict[int, tuple[tuple[f
 
 if __name__ == '__main__':
     print(f"Starting test: {current_time()}")
-    test(Algo.quick_select)
     #test(Algo.lazy_select)
 
+    test_algo(Algo.lazy_select, Algo.hundred_k.value, 100)
     # compare_all()
 
     print(f"End test: {current_time()}")
